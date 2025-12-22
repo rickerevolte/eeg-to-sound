@@ -14,8 +14,9 @@ import csv
 
 EEG_FILE = "../demo_EEG/demofile.EEG"
 CHANNEL_NAMES = [
-    "Fp1","Fp2","F3","F4","C3","C4","P3","P4","O1","O2",
-    "F7","F8","T3","T4","T5","T6","Fz","Cz","Pz"]
+    "FP2","FP1","F8","F7","F4","F3","Fz","T4","T3","C4",
+    "C3","Cz","T6","T5","P4","P3","Pz","O2","O1","A2","A1"
+]
 SFREQ = 256.0
 N_BYTES_MARKERS = 8192
 EPOCH_TMIN, EPOCH_TMAX = -0.1, 0.5
