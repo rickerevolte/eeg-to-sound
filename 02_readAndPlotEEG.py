@@ -14,11 +14,12 @@ import csv
 
 EEG_FILE = "../demo_EEG/demofile.EEG"
 CHANNEL_NAMES = [
-    "FP2","FP1","F8","F7","F4","F3","Fz","T4","T3","C4",
+    "Fp2","Fp1","F8","F7","F4","F3","Fz","T4","T3","C4",
     "C3","Cz","T6","T5","P4","P3","Pz","O2","O1","A2","A1"
 ]
 SFREQ = 256.0
 N_BYTES_MARKERS = 8192
+SCALE = 5 / (10**8)
 EPOCH_TMIN, EPOCH_TMAX = -0.1, 0.5
 # ------------------------------------------------
 # Functions
@@ -53,7 +54,7 @@ def detect_binary_offset(filename, min_offset=200, max_scan=20000):
         header = f.read(offset)  # read first number of bytes
     return offset
 
-def extract_markers(path, n_bytes=N_BYTES_MARKERS, sfreq=SFREQ):
+def extract_markers(path, n_bytes = N_BYTES_MARKERS, sfreq = SFREQ):
     """ Extract markers from the last bytes of the EEG file. """
     with open(path, "rb") as f:
         f.seek(-n_bytes, os.SEEK_END)
@@ -97,7 +98,8 @@ def check_for_nans(evoked_dict):
 
 def main():
     print(f"loading file: ", EEG_FILE)
-    OFFSET = detect_binary_offset(EEG_FILE)
+    #OFFSET = detect_binary_offset(EEG_FILE)
+    OFFSET = (5345 - (42 * 10)) # Byte 5346 + 1 is first byte of binary stream. OFFSET gives 10 Samples preroll
     data = np.fromfile(EEG_FILE, dtype=np.int16, offset=OFFSET)
     print("\nLength data: ",data.size)
     n_channels = len(CHANNEL_NAMES)
@@ -106,7 +108,7 @@ def main():
     data = data.reshape(n_samples, n_channels).T # creates a 2D array from data with samples on x- and channels on y-axis
 
     """ Optional: convert to µV """
-    data = data.astype(np.float64) * 0.195  # Example scaling, depending on device
+    data = data.astype(np.float32) * SCALE  # Example scaling, depending on device
     info = mne.create_info(CHANNEL_NAMES, SFREQ, ch_types="eeg")
     montage = mne.channels.make_standard_montage("standard_1020")
     info.set_montage(montage)
@@ -132,6 +134,6 @@ def main():
     )
     raw.set_annotations(annotations)
 
-    raw.plot(n_channels=19, duration=10.0, scalings="auto", block=True)
+    raw.plot(n_channels=len(CHANNEL_NAMES), duration=10.0, scalings= None, block=True)
 if __name__ == "__main__":
     main()
